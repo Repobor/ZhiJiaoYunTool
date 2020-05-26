@@ -9,6 +9,7 @@ from Get_All_Course import get_all_course
 
 def main(stuid, schoolid):
     allcourse = get_all_course(stuid)
+    print(allcourse)
     courseOpenId = allcourse['courseOpenId']
     url = 'https://zjyapp.icve.com.cn/newmobileapi/coursequestion/getCourseQuestionList'
     data = {
@@ -30,7 +31,10 @@ def main(stuid, schoolid):
     # PreviewList = requests.post(url=url, data=data).json()
     # 先转为文本删除无效内容再转回去json处理
     PreviewListReq = requests.post(url=url, data=data).text
-    PreviewListReq = PreviewListReq.replace('&nbsp;', '').replace('</span>', '').replace('</p>', '').replace('</font>', '').replace('<strong>', '').replace('</strong>', '').replace('<b>', '').replace('</b>', '').replace('<div>','').replace('</div>','').replace('<br>','').replace('<br/>','')
+    PreviewListReq = PreviewListReq.replace('&nbsp;', '').replace('</span>', '').replace('</p>', '').replace('</font>',
+                                                                                                             '').replace(
+        '<strong>', '').replace('</strong>', '').replace('<b>', '').replace('</b>', '').replace('<div>', '').replace(
+        '</div>', '').replace('<br>', '').replace('<br/>', '')
     PreviewListReq = re.sub('<p.*?>', "", PreviewListReq)
     PreviewListReq = re.sub('<span.*?>', "", PreviewListReq)
     PreviewListReq = re.sub('<font.*?>', "", PreviewListReq)
@@ -47,21 +51,9 @@ def main(stuid, schoolid):
         index = 1
         filename = time.strftime("%Y-%m-%d-%H-%M", time.localtime())
         for item in questions:
-            # Title = item['title'].replace('&nbsp;', '').replace('<p>', '').replace('</p>', '').replace('<strong>',
-            # '').replace(
-            #   '</strong>', '').replace('<br/>', '')
             Title = item['title']
-            # Title = re.sub('<.*?>', "", Title)
-            # dataJson = item['dataJson'].replace('true', '：对').replace('false', '').replace('[', '').replace(']', '') \
-            # .replace('"', '').replace('SortOrder', '').replace('0', '').replace('1', '').replace('2', '').replace(
-            # '4', '').replace(
-            # '3', '') \
-            # .replace('Content', '').replace(':', '').replace('IsAnswer', '').replace(',', '  ').replace('&nbsp;',
-            # '')
-            # dataJson = re.sub('<.*?>', "", dataJson)
-            dataJson = item['dataJson']
             try:
-                with open(f"{filename}"+kzm, "a", encoding="utf-8") as file:
+                with open(f"{filename}" + kzm, "a", encoding="utf-8") as file:
                     if item['queTypeName'] == "单选题":
                         dataJsons = json.loads(item['dataJson'])
                         Contents = ''
@@ -72,7 +64,6 @@ def main(stuid, schoolid):
                                 key = '单选题答案:' + tihao + '.' + Content
                             Contents = Contents + tihao + '.' + Content + hhf
                         Contents = Contents + key
-                        # file.write('题目' + str(index) + ':' + Title + '\n' + '单选题答案：' + dataJson + '\n\n')
                         file.write('题目' + str(index) + ':' + Title + hhf + Contents + hhf + hhf)
                     if item['queTypeName'] == "多选题":
                         dataJsons = json.loads(item['dataJson'])
@@ -98,19 +89,19 @@ def main(stuid, schoolid):
                         file.write('题目' + str(index) + ':' + Title + hhf + hhf + '问答题答案：' + y + hhf + hhf)
                     if item['queTypeName'] == "填空题(客观)":
                         y = item['answer']
-                        file.write('题目' + str(index) + ':' + Title + hhf + hhf + '填空题(客观)答案：' + hhf + hhf)
+                        file.write('题目' + str(index) + ':' + Title + hhf + hhf + '填空题(客观)答案：' + y + hhf + hhf)
+                    if item['queTypeName'] == '填空题(主观)':
+                        y = item['answer']
+                        file.write('题目' + str(index) + ':' + Title + '\n\n' + '填空题(主观)答案：' + y + '\n\n')
                     index += 1
             except json.JSONDecodeError as e:
                 print(PreviewList)
                 pass
         print(f"{filename}已下载")
         print("答案已保存软件根目录下！")
-        sele = input("【1】返回首页\n【2】返回上级\n请选择：")
-        if sele == 2:
-            main(stuid, schoolid)
-        else:
-            from Main import main as menu
-            menu()
+        input("回车后返回首页！")
+        from Main import main as menu
+        menu()
 
 
 if __name__ == '__main__':
